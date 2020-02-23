@@ -12,8 +12,8 @@ This project is a Python web application built using Flask. The user can log in 
 
 ## How to Run FlaskWebProject in Azure
 1. Complete Steps 1-4 above if not done already.
-5. Create an Azure Pipeline for a Python App Service. This will take care of deploying the App Service to Azure.
-6. Go to the app service in the Azure Portal, select Configuration, and provide all of the correct values for each of the environment variables to match what is set in Azure.
+2. Create an Azure Pipeline for a Python App Service. This will take care of deploying the App Service to Azure.
+3. Go to the app service in the Azure Portal, select Configuration, and provide all of the correct values for each of the environment variables to match what is set in Azure.
 
 ## Log In Credentials for FlaskWebProject
 Username: admin
@@ -41,9 +41,9 @@ You are expected to do the following to complete this project:
 4. Create an Azure Pipeline to deploy the FlaskWebProject. After creating the Azure Pipeline, you will be provided with a file called "azure-pipelines.yml". Please provide this file when submitting your project solution.
 6. Deploy the FlaskWebProject to Azure as an App Service.
 7. To prove that the application in on Azure and working, go to the URL of the App Service, log in using the credentials in this README, click the Create button, and create an article with the following data:
-	1. Title: "Hello World!"
-	2. Author: "Jane Doe"
-	3. Body: "My name is Jane Doe and this is my first article!"
-	4. Upload an image of your choice. Must be either a .png or .jpg.
+	- Title: "Hello World!"
+	- Author: "Jane Doe"
+	- Body: "My name is Jane Doe and this is my first article!"
+	- Upload an image of your choice. Must be either a .png or .jpg.
    After saving, click back on the article you created and provide a screenshot proving that it was created successfully. Please also make sure the URL is present in the screenshot.
 8. Log into the Azure Portal, go to your Resource Group, and provide a screenshot including all of the resources that were created to complete this project. (see sample screenshot in "Sample Solution Screenshot" folder)
