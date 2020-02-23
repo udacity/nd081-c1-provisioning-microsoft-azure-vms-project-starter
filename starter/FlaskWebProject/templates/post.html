@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<form action="" method="post" novalidate enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col-sm-4">
+            <p>
+                {{ form.title.label }}<br>
+                {{ form.title(size=64) }}
+                {% for error in form.title.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.author.label }}<br>
+                {{ form.author(size=32) }}
+                {% for error in form.author.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.body.label }}<br>
+                {{ form.body(cols=70, rows=20) }}
+                {% for error in form.body.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>{{ form.submit() }}</p>
+        </div>
+        <div class="col-sm-4">
+            {% if form.image_path.data %}
+            <p><img src="{{ imageSource + form.image_path.data }}" width="250" height="250" /></p>
+            {% endif %}
+            <p>
+                {{ form.image_path.label }}<br>
+                {{ form.image_path }}
+                {% for error in form.image_path.errors %}
+                <span style="color: red;">{{ error.join(form.image_path.errors) }}</span>
+                {% endfor %}
+            </p>
+        </div>
+    </div>
+</form>
+{% endblock %}
