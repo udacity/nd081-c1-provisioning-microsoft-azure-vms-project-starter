@@ -117,6 +117,7 @@ def _load_cache():
 
 def _save_cache(cache):
     # TODO: Save the cache, if it has changed
+    return None
 
 def _build_msal_app(cache=None, authority=None):
     # TODO: Return a ConfidentialClientApplication
