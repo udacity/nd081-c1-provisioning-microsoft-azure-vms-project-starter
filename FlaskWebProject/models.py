@@ -3,7 +3,8 @@ from FlaskWebProject import app, db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from azure.storage.blob import BlockBlobService
-import string, random
+import string
+import random
 from werkzeug import secure_filename
 from flask import flash
 
@@ -51,6 +52,15 @@ class Post(db.Model):
         return '<Post {}>'.format(self.body)
 
     def save_changes(self, form, file, userId, new=False):
+        """
+        Used to save changes to posts and create an
+        image blog entry
+        :param form:
+        :param file:
+        :param userId:
+        :param new:
+        :return:
+        """
         self.title = form.title.data
         self.subtitle = form.subtitle.data
         self.author = form.author.data
@@ -58,13 +68,13 @@ class Post(db.Model):
         self.user_id = userId
 
         if file:
-            filename = secure_filename(file.filename);
-            fileextension = filename.rsplit('.', 1)[1];
-            Randomfilename = id_generator();
-            filename = Randomfilename + '.' + fileextension;
+            filename = secure_filename(file.filename)
+            fileextension = filename.rsplit('.', 1)[1]
+            Randomfilename = id_generator()
+            filename = Randomfilename + '.' + fileextension
             try:
                 blob_service.create_blob_from_stream(blob_container, filename, file)
-                if (self.image_path):
+                if self.image_path:
                     blob_service.delete_blob(blob_container, self.image_path)
             except Exception:
                 flash(Exception)
@@ -72,3 +82,19 @@ class Post(db.Model):
         if new:
             db.session.add(self)
         db.session.commit()
+
+    def delete_blobs(self, image_path, blob_container_name=None) -> bool:
+        """
+        Used to delete post blobs when posts are
+        deleted
+        :param blob_container_name:
+        :param image_path:
+        :return: bool
+        """
+        try:
+            if self.image_path == image_path:
+                blob_service.delete_blob(image_path, blob_container_name)
+                return True
+        except Exception:
+            flash(Exception)
+            return False

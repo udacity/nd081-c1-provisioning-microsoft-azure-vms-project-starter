@@ -21,6 +21,10 @@ imageSourceUrl = 'https://' + app.config['BLOB_ACCOUNT'] + '.blob.core.windows.n
 @app.route('/home')
 @login_required
 def home():
+    """
+    Used to display home page
+    :return: Home template
+    """
     user = User.query.filter_by(username=current_user.username).first_or_404()
     posts = Post.query.all()
     return render_template(
@@ -33,6 +37,10 @@ def home():
 @app.route('/new_post', methods=['GET', 'POST'])
 @login_required
 def new_post():
+    """
+    Used to create a new post
+    :return: home template
+    """
     form = PostForm(request.form)
     if form.validate_on_submit():
         post = Post()
@@ -49,6 +57,11 @@ def new_post():
 @app.route('/post/<int:id>', methods=['GET', 'POST'])
 @login_required
 def post(id):
+    """
+    Used to edit post
+    :param id:
+    :return: Home template
+    """
     post = Post.query.get(int(id))
     form = PostForm(formdata=request.form, obj=post)
     if form.validate_on_submit():
@@ -62,8 +75,38 @@ def post(id):
     )
 
 
+@app.route('/deletepost/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_post(id):
+    """
+    Used to delete posts
+    :param id:
+    :return: Home template
+    """
+    post = db.session.query(Post).filter(Post.id==id).first()
+    if post: # if post with id exists delete it
+        # Delete the blob
+        delete_blob = post.delete_blobs(image_path=post.image_path)
+        if delete_blob:
+            # TODO: Delete post
+            db.session.delete(post)
+            db.session.commit()
+        else:
+            flash('Blob was not deleted and hence post wasn\'t deleted!')
+    posts = Post.query.all()
+    return render_template(
+        'index.html',
+        title='Home Page',
+        posts=posts
+    )
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Used to login user
+    :return: # TODO: complete this
+    """
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
@@ -73,6 +116,8 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
+        # INFO: Added logs for user logins
+        app.logger.info('%s logged in successfully', user.username)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
@@ -84,6 +129,10 @@ def login():
 
 @app.route(Config.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized():
+    """
+    Used to authorize user using ADD
+    :return: Redirect to home page
+    """
     if request.args.get('state') != session.get("state"):
         return redirect(url_for("home"))  # No-OP. Goes back to Index page
     if "error" in request.args:  # Authentication/Authorization failure
@@ -100,7 +149,7 @@ def authorized():
         session["user"] = result.get("id_token_claims")
         # Note: In a real app, we'd use the 'name' property from session["user"] below
         # Here, we'll use the admin username for anyone who is authenticated by MS
-        user = User.query.filter_by(username="admin").first()
+        user = User.query.filter_by(username=session["user"]).first()
         login_user(user)
         _save_cache(cache)
     return redirect(url_for('home'))
@@ -108,6 +157,10 @@ def authorized():
 
 @app.route('/logout')
 def logout():
+    """
+    Used to logout user
+    :return: Redirect to login page
+    """
     logout_user()
     if session.get("user"):  # Used MS Login
         # Wipe out user and its token cache from session
@@ -121,6 +174,11 @@ def logout():
 
 
 def _load_cache():
+    """
+    Used to load cached Microsoft mail
+    account user's credentials
+    :return: The stored cache
+    """
     # TODO: Load the cache from `msal`, if it exists
     cache = msal.SerializableTokenCache()
     if session.get('token_cache'):
@@ -129,12 +187,24 @@ def _load_cache():
 
 
 def _save_cache(cache):
+    """
+    Used to cache user information
+    :param cache:
+    :return: Nothid
+    """
     # TODO: Save the cache, if it has changed
     if cache.has_state_changed:
         session['token_cache'] = cache.serialize()
 
 
 def _build_msal_app(cache=None, authority=None):
+    """
+    Used to build a Microsoft Authentication Library
+    client object
+    :param cache:
+    :param authority:
+    :return: ConfidentialClientApplication
+    """
     # TODO: Return a ConfidentialClientApplication
     return msal.ConfidentialClientApplication(
         Config.CLIENT_ID, authority=authority or Config.AUTHORITY,
@@ -143,6 +213,13 @@ def _build_msal_app(cache=None, authority=None):
 
 
 def _build_auth_url(authority=None, scopes=None, state=None):
+    """
+    Used to build the auth request url
+    :param authority:
+    :param scopes:
+    :param state:
+    :return: The full Auth Request URL
+    """
     # TODO: Return the full Auth Request URL with appropriate Redirect URI
     return _build_msal_app(authority=authority).get_authorization_request_url(
         scopes or [], state=state or str(uuid.uuid4()),

@@ -12,6 +12,7 @@
                     <th scope="col">Author</th>
                     <th scope="col">Has Image?</th>
                     <th scope="col" />
+                    <th scope="col" />
                 </tr>
             </thead>
             <tbody>
@@ -24,6 +25,7 @@
                 <td>{{ post.author }}</td>
                 <td>{{ post.image_path != None }}</td>
                 <td><a href="{{ url_for('post', id=post.id) }}">Edit Post</a></td>
+                <td><a class="btn btn-danger" href="{{ url_for('delete_post', id=post.id) }}">Delete Post</a></td>
             </tr>
             {% endfor %}
         </table>
