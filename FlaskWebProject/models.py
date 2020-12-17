@@ -98,3 +98,4 @@ class Post(db.Model):
         except Exception:
             flash(Exception)
             return False
+        return False
