@@ -83,7 +83,7 @@ class Post(db.Model):
             db.session.add(self)
         db.session.commit()
 
-    def delete_blobs(self, image_path, blob_container_name=None) -> bool:
+    def delete_blobs(self, image_path) -> bool:
         """
         Used to delete post blobs when posts are
         deleted
@@ -93,7 +93,7 @@ class Post(db.Model):
         """
         try:
             if self.image_path == image_path:
-                blob_service.delete_blob(image_path, blob_container_name)
+                blob_service.delete_blob(blob_container, self.image_path)
                 return True
         except Exception:
             flash(Exception)
