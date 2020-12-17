@@ -114,10 +114,11 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
+            app.logger.warning('%s Failed login: Invalid credentials')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         # INFO: Added logs for user logins
-        app.logger.info('%s logged in successfully in at ', user.username)
+        app.logger.info('%s logged in successfully at ', user.username)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
@@ -161,11 +162,11 @@ def logout():
     Used to logout user
     :return: Redirect to login page
     """
+    app.logger.info('%s Successfully logged out at ', current_user)
     logout_user()
     if session.get("user"):  # Used MS Login
         # Wipe out user and its token cache from session
         session.clear()
-        app.logger.info('%s Successfully logged out at ', current_user)
         # Also logout from your tenant's web session
         return redirect(
             Config.AUTHORITY + "/oauth2/v2.0/logout" +
