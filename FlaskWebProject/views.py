@@ -10,6 +10,7 @@ from FlaskWebProject import app, db
 from FlaskWebProject.forms import LoginForm, PostForm
 from flask_login import current_user, login_user, logout_user, login_required
 from FlaskWebProject.models import User, Post
+from dateutil import tz
 import msal
 import uuid
 
@@ -110,15 +111,19 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
+    now = datetime.now(tz=tz.tzlocal())
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
-            app.logger.warning('%s Failed login: Invalid credentials')
+            app.logger.warning('Timezone [%s], Year[%s], Month[%s], Day[%s]: Failed login: Invalid credentials',
+                               now.tzname(),
+                               now.year, now.month, now.day)
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         # INFO: Added logs for user logins
-        app.logger.info('%s logged in successfully at ', user.username)
+        app.logger.info('Timezone [%s], Year[%s], Month[%s], Day[%s]: %s logged in successfully at ',
+                        now.tzname(), now.year, now.month, now.day, user.username)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
@@ -162,7 +167,9 @@ def logout():
     Used to logout user
     :return: Redirect to login page
     """
-    app.logger.info('%s Successfully logged out at ', current_user)
+    now = datetime.now(tz=tz.tzlocal())
+    app.logger.info('%s Successfully logged out at ', now.tzname(),
+                    now.year, now.month, now.day, current_user)
     logout_user()
     if session.get("user"):  # Used MS Login
         # Wipe out user and its token cache from session
